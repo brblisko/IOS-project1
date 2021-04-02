@@ -160,6 +160,8 @@ if [ -n "$before" ] && [ -z "$after" ]; then
     dateFilter="\$1 < \"$before\""
 fi
 
+filtr="{ print }"
+
 if [ -n "$dateFilter" ] && [ -n "$ticker" ]; then
     filtr="(($dateFilter)&&($ticker))"
 fi
@@ -172,4 +174,13 @@ if [ -n "$ticker" ] && [ -z "$dateFilter" ]; then
     filtr="$ticker"
 fi
 
-eval "$readInput | awk -F ';' '$filtr'"
+case "$command" in
+
+list-tick)
+    eval "$readInput | awk -F ';' '$filtr'" | awk -F ';' '{ print $2 }' | sort | uniq
+    exit 0
+    ;;
+*)
+    eval "$readInput | awk -F ';' '$filtr'"
+    ;;
+esac
