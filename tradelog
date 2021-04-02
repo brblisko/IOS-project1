@@ -42,7 +42,7 @@ before=""
 
 while [ "$#" -gt 0 ]; do # spracovanie argumentov
     case "$1" in
-    list-tick | profit | pos | last-pride | hist-ord | graph-pos)
+    list-tick | profit | pos | last-price | hist-ord | graph-pos)
 
         if [ -n "$command" ]; then
             echoerr ERROR - multiple commands
@@ -242,7 +242,30 @@ pos)
     }' | sort -t ':' -k2,2 -n -r
     exit 0
     ;;
-
+last-price)
+    eval "$readInput | awk -F ';' '$filtr'" | sort -t ';' -k2,2 -r | sort -t ';' -k2,2 -u | awk -F ';' '
+    {
+        tmp = sprintf("%.2f", $4 );
+        if(length(tmp) > longestNum)
+        {
+            longestNum=length(tmp);
+        }
+        printf("%0.2f %s\n", $4 , $2);
+    }
+    END{printf("LongestNum %d\n",longestNum);}' | sort -g | awk '
+    {
+        if($1 == "LongestNum")
+        {
+            longNum = $2;
+        }
+        
+        if($1 != "LongestNum")
+        {
+        tmp = sprintf("%.2f", $1);
+        printf("%-10s: %*s\n", $2, longNum , tmp);
+        }
+    }' | sort
+    ;;
 *)
     eval "$readInput | awk -F ';' '$filtr'"
     ;;
