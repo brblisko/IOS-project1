@@ -7,7 +7,7 @@ print_help() {
     echo "Usage: tradelog [-h | --help]"
     echo "       tradelog [FILTER...] [COMMAND] [LOG1 [LOG2 [...]]]"
     echo ""
-    echo "Commands: list-tick – výpis seznamu vyskytujících se burzovních symbolů, tzv. “tickerů”."
+    echo "Commands: list-tick – výpis seznamu vyskytujících se burzovních symbolu, tzv. “tickeru”."
     echo "          profit – výpis celkového zisku z uzavřených pozic."
     echo "          pos – výpis hodnot aktuálně držených pozic seřazených sestupně dle hodnoty."
     echo "          last-price – výpis poslední známé ceny pro každý ticker."
@@ -36,9 +36,9 @@ gzFiles=""
 logFiles=""
 command=""
 width=""
-tickers=""
-after="0000-00-00 00:00:00"
-before="9999-99-99 99:99:99"
+ticker=""
+after=""
+before=""
 
 while [ "$#" -gt 0 ]; do # spracovanie argumentov
     case "$1" in
@@ -72,12 +72,28 @@ while [ "$#" -gt 0 ]; do # spracovanie argumentov
         shift
         ;;
     -a)
-        after="$2"
+        if [ -z "$after" ]; then
+            after="$2"
+        else
+            savedDate=$(date -d "$after" +%s)
+            newDate=$(date -d "$2" +%s)
+            if [ "$newDate" -gt "$savedDate" ]; then
+                after="$2"
+            fi
+        fi
         shift
         shift
         ;;
     -b)
-        before="$2"
+        if [ -z "$before" ]; then
+            before="$2"
+        else
+            savedDate=$(date -d "$before" +%s)
+            newDate=$(date -d "$2" +%s)
+            if [ "$newDate" -lt "$savedDate" ]; then
+                after="$2"
+            fi
+        fi
         shift
         shift
         ;;
@@ -92,12 +108,16 @@ while [ "$#" -gt 0 ]; do # spracovanie argumentov
             exit 1
         fi
 
-        tickers="$2 $tickers"
+        if [ -z "$ticker" ]; then
+            ticker="$ticker\$2 == \"$2\""
+        else
+            ticker="$ticker || \$2 == \"$2\""
+        fi
         shift
         shift
         ;;
     *)
-        if echo "$1" | grep -q ".gz"; then
+        if echo "$1" | grep -q .gz$; then
             gzFiles="$1 $gzFiles"
         else
             logFiles="$1 $logFiles"
@@ -126,4 +146,30 @@ then
     readInput="cat -"
 fi
 
-eval "$readInput"
+dateFilter=""
+
+if [ -n "$after" ] && [ -n "$before" ]; then
+    dateFilter="\$1 > \"$after\" && \$1 < \"$before\""
+fi
+
+if [ -n "$after" ] && [ -z "$before" ]; then
+    dateFilter="\$1 > \"$after\""
+fi
+
+if [ -n "$before" ] && [ -z "$after" ]; then
+    dateFilter="\$1 < \"$before\""
+fi
+
+if [ -n "$dateFilter" ] && [ -n "$ticker" ]; then
+    filtr="(($dateFilter)&&($ticker))"
+fi
+
+if [ -n "$dateFilter" ] && [ -z "$ticker" ]; then
+    filtr="$dateFilter"
+fi
+
+if [ -n "$ticker" ] && [ -z "$dateFilter" ]; then
+    filtr="$ticker"
+fi
+
+eval "$readInput | awk -F ';' '$filtr'"
