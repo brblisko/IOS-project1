@@ -265,7 +265,38 @@ last-price)
         printf("%-10s: %*s\n", $2, longNum , tmp);
         }
     }' | sort -t ':' -k1,1
+    exit 0
     ;;
+hist-ord)
+    if [ -z "$width" ]; then
+        eval "$readInput | awk -F ';' '$filtr'" | awk -F ';' '{ print $2 }' | sort | uniq -c | awk '
+        {
+        printf("%-10s: ", $2);
+        for(i;i < $1;i++){
+            printf("#");
+        }
+        i = 0
+        printf("\n")
+        }'
+    else
+        eval "$readInput | awk -F ';' '$filtr'" | awk -F ';' '{ print $2 }' | sort | uniq -c | sort |
+            awk -v mineWidth="$width" '
+        {
+        if(NR == 1){
+            ratio = mineWidth / $1
+        }
+        printf("%-10s: ", $2);
+        for(i;i < $1 * ratio;i++){
+            printf("#");
+        }
+        i = 0
+        printf("\n")
+        }' | sort -t ':' -k1,1
+
+    fi
+
+    ;;
+
 *)
     eval "$readInput | awk -F ';' '$filtr'"
     ;;
