@@ -109,7 +109,7 @@ while [ "$#" -gt 0 ]; do # spracovanie argumentov
         fi
 
         if [ -z "$ticker" ]; then
-            ticker="$ticker\$2 == \"$2\""
+            ticker="\$2 == \"$2\""
         else
             ticker="$ticker || \$2 == \"$2\""
         fi
@@ -192,13 +192,57 @@ profit)
             sum -= $4 * $6; 
         }
     }
- 
-    END 
-    { 
-        printf("%.2f",sum);     
-    }'
+    END{printf("%.2f\n",sum)}'
     exit 0
     ;;
+pos)
+    eval "$readInput | awk -F ';' '$filtr'" | sort -t ';' -k2,2 -r | awk -F ';' '
+    {
+        if(tickChck=="")
+        {
+            tickChck = $2;
+            cost = $4;
+        }
+
+        if(tickChck != $2)
+        {
+            tmp = sprintf("%.2f",sum * cost);
+            if(length(tmp) > longestNum)
+            {
+                longestNum=length(tmp);
+            }
+            printf("%0.2f %s\n",sum * cost, tickChck);
+            tickChck = $2;
+            cost = $4;
+            sum = 0;
+        }
+
+        if($3 == "sell")
+        {
+         sum -= $6; 
+        }
+
+        if($3 == "buy")
+        {
+            sum += $6; 
+        }
+    }
+    END{printf("%0.2f %s\n",sum * cost, $2);printf("LongestNum %d\n",longestNum);}' | sort -r | awk '
+    {
+        if($1 == "LongestNum")
+        {
+            longNum = $2;
+        }
+
+        if($1 != "LongestNum")
+        {
+        tmp = sprintf("%.2f", $0);
+        printf("%-10s: %*s\n", $2, longNum , tmp);
+        }
+    }' | sort -t ':' -k2,2 -n -r
+    exit 0
+    ;;
+
 *)
     eval "$readInput | awk -F ';' '$filtr'"
     ;;
