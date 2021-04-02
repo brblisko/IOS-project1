@@ -227,16 +227,16 @@ pos)
             sum += $6; 
         }
     }
-    END{printf("%0.2f %s\n",sum * cost, $2);printf("LongestNum %d\n",longestNum);}' | sort -r | awk '
+    END{printf("%0.2f %s\n",sum * cost, $2);printf("LongestNum %d\n",longestNum);}' | sort -g | awk '
     {
         if($1 == "LongestNum")
         {
             longNum = $2;
         }
-
+        
         if($1 != "LongestNum")
         {
-        tmp = sprintf("%.2f", $0);
+        tmp = sprintf("%.2f", $1);
         printf("%-10s: %*s\n", $2, longNum , tmp);
         }
     }' | sort -t ':' -k2,2 -n -r
