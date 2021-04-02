@@ -264,7 +264,7 @@ last-price)
         tmp = sprintf("%.2f", $1);
         printf("%-10s: %*s\n", $2, longNum , tmp);
         }
-    }' | sort
+    }' | sort -t ':' -k1,1
     ;;
 *)
     eval "$readInput | awk -F ';' '$filtr'"
