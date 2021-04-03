@@ -316,7 +316,7 @@ graph-pos)
         function abs(v) {return v < 0 ? -v : v}
         {
             if(mineWidth==""){
-               printf("%-10s:", $2);
+                printf("%-10s:", $2);
                 for(i;i < int(abs($1 / 1000));i++){
                     if(i==0){
                         printf(" ");
@@ -329,9 +329,9 @@ graph-pos)
                     {
                         printf("!");
                     }
-            }
-            i = 0
-            printf("\n")
+                    i = 0
+                    printf("\n")
+                }
             }
             else{
                 if(NR == 1){
