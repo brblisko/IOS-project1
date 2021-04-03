@@ -329,9 +329,9 @@ graph-pos)
                     {
                         printf("!");
                     }
-                    i = 0
-                    printf("\n")
                 }
+                i = 0
+                printf("\n")
             }
             else{
                 if(NR == 1){
