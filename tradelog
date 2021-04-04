@@ -1,5 +1,17 @@
 #!/bin/sh
 
+#|=============================================================================
+#|   Assignment:  1. Uloha
+#|
+#|       Author:  Boris Vesely 
+#|        Login:  xvesel92
+#|
+#|        Class:  IOS - Operacni systemy
+#|
+#|=============================================================================
+
+
+
 export POSIXLY_CORRECT=yes
 export LC_NUMERIC=en_US.UTF-8
 
@@ -75,8 +87,9 @@ pos_function() {
     }
     END{printf("%0.2f %s\n",sum * cost, $2);
         tmp = sprintf("%.2f",sum * cost);
-        if(length(tmp) > longestNum)
-        {longestNum=length(tmp);}
+        if(length(tmp) > longestNum){
+		longestNum=length(tmp);
+	}
         printf("LongestNum %d\n",longestNum);}' |
         sort -g | awk '
     {
